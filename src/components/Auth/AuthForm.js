@@ -1,10 +1,14 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useContext } from "react";
+import AuthContext from "../../store/auth-context";
 
 import classes from "./AuthForm.module.css";
 
 const AuthForm = () => {
   const emailInputRef = useRef();
   const passwordInputRef = useRef();
+
+  const authCtx = useContext(AuthContext);
+
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
 
@@ -18,47 +22,30 @@ const AuthForm = () => {
     const enteredEmail = emailInputRef.current.value;
     const enteredPassword = passwordInputRef.current.value;
     setLoading(true);
+
+    let url;
     if (isLogin) {
-      fetch(
-        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyDovX5U11h_IZTG9O-7IcYVeXe9tpSTIGU",
-        {
-          method: "POST",
-          body: JSON.stringify({
-            email: enteredEmail,
-            password: enteredPassword,
-            returnSecureToken: true,
-          }),
-        }
-      ).then((res) => {
-        setLoading(false);
-        if (res.ok) {
-          res.json().then((data) => {
-            console.log(data.idToken);
-          });
-        } else {
-          res.json().then((data) => {
-            let errorMessage = "Authentication failed";
-            alert(errorMessage);
-          });
-        }
-      });
+      url =
+        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyDovX5U11h_IZTG9O-7IcYVeXe9tpSTIGU";
     } else {
-      fetch(
-        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyDovX5U11h_IZTG9O-7IcYVeXe9tpSTIGU",
-        {
-          method: "POST",
-          body: JSON.stringify({
-            email: enteredEmail,
-            password: enteredPassword,
-            returnSecureToken: true,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      ).then((res) => {
+      url =
+        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyDovX5U11h_IZTG9O-7IcYVeXe9tpSTIGU";
+    }
+    fetch(url, {
+      method: "POST",
+      body: JSON.stringify({
+        email: enteredEmail,
+        password: enteredPassword,
+        returnSecureToken: true,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => {
         setLoading(false);
         if (res.ok) {
+          return res.json();
         } else {
           res.json().then((data) => {
             let errorMessage = "Authentication failed";
@@ -67,10 +54,17 @@ const AuthForm = () => {
             // }
             console.log(errorMessage);
             alert(errorMessage);
+            throw new Error(errorMessage);
           });
         }
+      })
+      .then((data) => {
+        console.log(data.idToken);
+        authCtx.login(data.idToken);
+      })
+      .catch((err) => {
+        alert(err.message);
       });
-    }
   };
 
   return (
