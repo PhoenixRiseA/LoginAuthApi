@@ -1,11 +1,13 @@
 import classes from "./ProfileForm.module.css";
 import React, { useContext, useRef, useState } from "react";
 import AuthContext from "../../store/auth-context";
+import { useHistory } from "react-router-dom";
 
 const ProfileForm = () => {
   const authCtx = useContext(AuthContext);
   const newPasswordRef = useRef();
   const [loading, setLoading] = useState(false);
+  const history = useHistory();
 
   const newPasswordHandler = (event) => {
     event.preventDefault();
@@ -24,9 +26,10 @@ const ProfileForm = () => {
       }),
       headers: { "Content-Type": "application/json" },
     }).then((res) => {
-      if (res.ok) {
-        return res.json();
-      }
+      history.replace("/");
+      // if (res.ok) {
+      //   return res.json();
+      // }
       // else {
       //   res.json().then((data) => {
       //     let errorMessage = "Updating password failed";

@@ -2,10 +2,17 @@ import { Link } from "react-router-dom";
 import React, { useContext } from "react";
 import classes from "./MainNavigation.module.css";
 import AuthContext from "../../store/auth-context";
+import { useHistory } from "react-router-dom";
 const MainNavigation = () => {
+  const history = useHistory();
   const authCtx = useContext(AuthContext);
   const isLoggedIn = authCtx.isLoggedIn;
   console.log(isLoggedIn);
+  const onLogoutHandler = (event) => {
+    event.preventDefault();
+    authCtx.logout();
+    history.replace("/auth");
+  };
   return (
     <header className={classes.header}>
       <Link to="/">
@@ -25,7 +32,7 @@ const MainNavigation = () => {
           )}
           {isLoggedIn && (
             <li>
-              <button>Logout</button>
+              <button onClick={onLogoutHandler}>Logout</button>
             </li>
           )}
         </ul>
